@@ -10,11 +10,6 @@ func main() {
 	r := gin.Default()
 
 	// define a route
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "Hello World",
-		})
-	})
 
 	r.POST("/room/:id", func(c *gin.Context) {
 		// get query string
@@ -31,7 +26,17 @@ func main() {
 
 	})
 
-	// start the server
+	// define a route to a static file
+	r.Static("/assets", "./frontend/public/assets")
+	r.GET("/", func(c *gin.Context) {
+		c.File("./frontend/public/index.html")
+	})
+	r.GET("/index", func(c *gin.Context) {
+		c.File("./frontend/public/index.html")
+	})
+	r.GET("/room/:id", func(c *gin.Context) {
+		c.File("./frontend/public/room.html")
+	})
 
 	r.Run()
 }
