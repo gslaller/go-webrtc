@@ -1,24 +1,60 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
+import { useEffect, useState } from 'react'
 import './App.css'
 
+type Room = {
+  name: string;
+  participants: number;
+}
+
+async function fetchRooms(): Promise<Room[]> {
+  const res = await fetch('/api/rooms')
+  return res.json()
+}
+
+function RenderRoomItem(room: Room) {
+  return (
+    <li key={room.name}>
+      <a href={`/room/${room.name}`} >
+        {room.name} ({room.participants})
+      </a>
+    </li>
+  )
+}
+
 function App() {
-  const [count, setCount] = useState(0)
+
+  const [rooms, setRooms] = useState<Room[]>([
+    { name: "laller's meeting room", participants: 2 },
+    { name: "Hallo Hamburg", participants: 3 },
+  ])
+
+  useEffect(() => {
+    // fetchRooms().then(rooms => { setRooms(rooms) });
+
+    // TODO: fetch the rooms at regular intervals? 
+  }, [])
 
   return (
     <div className="App">
-      <h1>This is HOME</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
+      <h1>
+        Zoom Clone
+      </h1>
+      <p>
+        A simple clone of Zoom, built with WebRTC, React and GO.
       </p>
+      <a href="/room" >
+        <button>
+          Create a new Room
+        </button>
+      </a>
+      <ul>
+        {
+          rooms.map(room => (
+            RenderRoomItem(room)
+          ))
+        }
+
+      </ul>
     </div>
   )
 }
