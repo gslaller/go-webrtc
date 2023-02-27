@@ -1,3 +1,4 @@
+
 async function sendOffer(offer: RTCSessionDescription): Promise<RTCSessionDescription> {
     let response = await fetch(URL + "/offer", {
         method: "POST",
@@ -10,9 +11,19 @@ async function sendOffer(offer: RTCSessionDescription): Promise<RTCSessionDescri
     return data
 }
 
-async function createoutboundconnection(stream?: MediaStream): Promise<[RTCPeerConnection, RTCDataChannel]> {
+async function createInboundConnect(peerId: PeerId) {
+    // first check if the peer even is transmitting a stream
+    // can a peer actually not transmit a stream?.
+    // the peer is only registered if it is transmitting a stream
+}
+
+async function createOutboundConnection(stream: MediaStream): Promise<[RTCPeerConnection, RTCDataChannel]> {
     return new Promise((resolve, reject) => {
-        console.log("creating outbound connection")
+
+        setTimeout(() => {
+            reject("timeout");
+        }, 10000);
+
         let peer = new RTCPeerConnection({
             iceServers: [
                 {
@@ -21,10 +32,19 @@ async function createoutboundconnection(stream?: MediaStream): Promise<[RTCPeerC
             ],
         })
 
-        if (stream === undefined) {
-            let transreviecer = peer.addTransceiver("audio", { direction: "sendonly" })
-        } else {
+        // There is a 
+
+
+
+        // add two tracks to the peer connection
+        if (stream !== undefined) {
+            peer.addTrack((stream.getVideoTracks())[0], stream);
             peer.addTrack((stream.getAudioTracks())[0], stream);
+        }
+
+        peer.ontrack = (event) => {
+            event.streams
+            console.log("track added")
         }
 
         let channel = peer.createDataChannel("datachannel", { ordered: true })
@@ -41,15 +61,14 @@ async function createoutboundconnection(stream?: MediaStream): Promise<[RTCPeerC
         }
 
 
-        peer.onicecandidate = async (event) => {
+        peer.onicecandidate = async () => {
             if (peer.iceGatheringState === "complete") {
                 let SDP = peer.localDescription;
                 if (SDP !== null) {
 
-                    sendOffer(SDP).then(async answer => {
-                        await peer.setRemoteDescription(answer)
-                        resolve([peer, channel])
-                    });
+                    let answer = await sendOffer(SDP);
+                    await peer.setRemoteDescription(answer)
+                    resolve([peer, channel])
                 }
             }
         };
